@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Comic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ComicController extends Controller
 {
@@ -13,7 +15,8 @@ class ComicController extends Controller
      */
     public function index()
     {
-        //
+        $comics = Comic::all();
+        return view('comics.index',  compact('comics'));
     }
 
     /**
@@ -23,7 +26,7 @@ class ComicController extends Controller
      */
     public function create()
     {
-        //
+        return view('comics.create');
     }
 
     /**
@@ -34,7 +37,30 @@ class ComicController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Stessi dati del seeder solo la variabile é $data
+
+        $data = $request->all();
+        $new_comic = new Comic();
+        // $new_comic->title = $data['title'];
+        // $new_comic->slug = Str::slug($data['title'], '-');
+        // $new_comic->thumb = $data['thumb'];
+        // $new_comic->description = $data['description'];
+        // $new_comic->price = $data['price'];
+        // $new_comic->series = $data['series'];
+        // $new_comic->sale_date = $data['sale_date'];
+        // $new_comic->type = $data['type'];
+        // $new_comic->save();
+
+
+        // Invece di passare ogni dato a mano usiamo questa funzione che lo fa in automatico con tutti i campi del form 
+        //In providers dentro Comic.php dobbiamo creare una variabile con tutti i campi del form 
+        // In questo caso lo slug lo facciamo perché non é presente nel form
+        $data['slug'] = Str::slug($data['title'], '-');
+        $new_comic->fill($data);
+        $new_comic->save();
+
+        // al salvataggio dei dati nel db facciamo un redirect su comic.show passando il nuovo dato 
+        return redirect()->route('comics.show', $new_comic);
     }
 
     /**
@@ -43,9 +69,12 @@ class ComicController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Comic $comics)
     {
-        //
+        if($comics) {
+            return view('comics.show', compact('comics'));
+        }
+        abort(404, 'Prodotto inesistente');
     }
 
     /**
